@@ -1,0 +1,79 @@
+{
+  "title": "PQC Payment Migration — Classical vs Hybrid",
+  "uid": "pqc-overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total payments processed",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [{ "expr": "sum(pqc_payments_processed_total)", "legendFormat": "total" }]
+    },
+    {
+      "id": 2,
+      "title": "Payments by path (classical vs hybrid_pqc)",
+      "type": "piechart",
+      "gridPos": { "h": 10, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [{ "expr": "sum by (path) (pqc_payments_processed_total)", "legendFormat": "{{path}}" }]
+    },
+    {
+      "id": 3,
+      "title": "Payments by rail",
+      "type": "piechart",
+      "gridPos": { "h": 10, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [{ "expr": "sum by (rail) (pqc_payments_processed_total)", "legendFormat": "{{rail}}" }]
+    },
+    {
+      "id": 4,
+      "title": "Handshake latency: classical vs hybrid PQC (p50/p90)",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(pqc_handshake_latency_ms_bucket{path=\"classical\"}[5m])) by (le))",
+          "legendFormat": "classical p50"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(pqc_handshake_latency_ms_bucket{path=\"hybrid_pqc\"}[5m])) by (le))",
+          "legendFormat": "hybrid_pqc p50"
+        },
+        {
+          "expr": "histogram_quantile(0.90, sum(rate(pqc_handshake_latency_ms_bucket{path=\"hybrid_pqc\"}[5m])) by (le))",
+          "legendFormat": "hybrid_pqc p90"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Signing latency: classical vs hybrid PQC (p50/p90)",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(pqc_signing_latency_ms_bucket{path=\"classical\"}[5m])) by (le))",
+          "legendFormat": "classical p50"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(pqc_signing_latency_ms_bucket{path=\"hybrid_pqc\"}[5m])) by (le))",
+          "legendFormat": "hybrid_pqc p50"
+        },
+        {
+          "expr": "histogram_quantile(0.90, sum(rate(pqc_signing_latency_ms_bucket{path=\"hybrid_pqc\"}[5m])) by (le))",
+          "legendFormat": "hybrid_pqc p90"
+        }
+      ]
+    }
+  ]
+}

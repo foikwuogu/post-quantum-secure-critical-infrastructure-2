@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports: ["8100:8100"]  # deliberately different from project 1's 8000, so both can run together
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports: ["9091:9090"]  # different host port from project 1's 9090
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports: ["3001:3000"]  # different host port from project 1's 3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+
+  frontend:
+    build:
+      context: ./frontend
+    ports: ["5174:5174"]  # different host port from project 1's 5173
+    depends_on: [backend]
+
+volumes:
+  grafana-data:
